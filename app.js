@@ -1,63 +1,80 @@
 //jshint esversion:6
-const express = require("express")
-const bodyParser = require("body-parser")
-const ejs = require("ejs")
-const mongoose = require("mongoose")
-mongoose
+require('dotenv').config();
+const express = require("express");
+const bodyParser = require("body-parser");
+const ejs = require("ejs");
+const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 
-const app = express()
-app.use('/static', express.static('public'));
+const app = express();
+
+app.use(express.static("public"));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
-    extended: true
+  extended: true
 }));
 
+mongoose.connect("mongodb://localhost:27017/userDB");
+
 const userSchema = new mongoose.Schema({
-    email:String,
-    password:String
-})
+  email: String,
+  password: String
+});
 
-const User = mongoose.model("User",userSchema);
+const secret = process.env.SCERET_KEY;
+userSchema.plugin(encrypt, { secret: secret , encryptedFields:["password"]});
 
+const User = mongoose.model('User', userSchema);
 
-mongoose.connect("mongodb://localhost:27017/userDB")
+app.get("/", function(req, res){
+  res.render("home");
+});
 
-app.get("/", (req, res)=> {
-    res.render("home");
-})
+app.get("/login", function(req, res){
+  res.render("login");
+});
 
-app.get("/:page", (req, res) => {
-    res.render(req.params.page);
-})
+app.get("/register", function(req, res){
+  res.render("register");
+});
 
-app.post("/login",(req,res)=>{
-    const username = req.body.username;
-    const password = req.body.password;
+app.post("/register", function(req, res){
+  const newUser =  new User({
+    email: req.body.username,
+    password: req.body.password
+  });
+  newUser.save(function(err){
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("secrets");
+    }
+  });
+});
 
-    User.findOne({email:username},(err,foundUser)=>{
-        if(!err){
-            if(foundUser){
-                if(foundUser.password===password)res.render("secrets");
-                else res.send("wrong credentials!");
-            }
+app.post("/login", function(req, res){
+  const username = req.body.username;
+  const password = req.body.password;
+
+  User.findOne({email: username}, function(err, foundUser){
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUser) {
+        if (foundUser.password === password) {
+          res.render("secrets");
         }
-    })
+      }
+    }
+  });
+});
 
 
-})
-
-app.post("/register",(req,res)=>{
-    const user = new User({
-        email:req.body.username,
-        password:req.body.password
-    })
-    user.save((err)=>{
-        if(!err)res.render("secrets");
-        else res.send("Error appeared while registering",err);
-    })
-})
 
 
-app.listen("3000", () => {
-    console.log("server running")
+
+
+
+app.listen(3000, function() {
+  console.log("Server started on port 3000.");
 });
