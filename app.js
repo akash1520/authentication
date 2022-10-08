@@ -7,12 +7,14 @@ const mongoose = require("mongoose");
 const session = require("express-session")
 const passport = require("passport")
 const passportLocalMongoose = require("passport-local-mongoose")
+const favicon = require('serve-favicon');
 const staticPath = path.join(__dirname,"/public");
+
 
 
 const app = express();
 
-// app.use(favicon(staticPath,"favicon.ico"));
+app.use(favicon(staticPath + '/favicon.ico'));
 
 app.use(express.static(staticPath));
 app.set('view engine', 'ejs');
