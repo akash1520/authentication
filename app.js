@@ -12,12 +12,13 @@ const staticPath = path.join(__dirname,"/public");
 
 const app = express();
 
+// app.use(favicon(staticPath,"favicon.ico"));
+
 app.use(express.static(staticPath));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-
 app.set('trust proxy',1)
 app.use(session({
   secret:"F#cking diabolical it is",
