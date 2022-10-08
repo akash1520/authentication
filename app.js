@@ -99,7 +99,7 @@ app.post("/login", function (req, res) {
     }
     else{
       passport.authenticate("local")(req,res,function(){
-        res.redirect("/secrets")
+        res.redirect("http://localhost:3000/")
       });
     }
   })
@@ -109,6 +109,6 @@ app.post("/login", function (req, res) {
 })
 
 
-app.listen("3000",()=>{
+app.listen("8080",()=>{
   console.log("server running")
 })
